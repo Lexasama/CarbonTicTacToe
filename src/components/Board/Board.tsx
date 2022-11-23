@@ -1,6 +1,7 @@
 import Square from "../Square/Square";
+import React from 'react';
 
-function Board(props: any) {
+function Board(props: { squares: string[]; onClick: (i: number) => void; }) {
 
     const renderSquare = (i: number) => {
         return (
@@ -10,6 +11,7 @@ function Board(props: any) {
             />
         );
     };
+
     return (
         <div>
             <div className="board-row">

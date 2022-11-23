@@ -1,23 +1,25 @@
 import React, {useState} from 'react';
 import {calculateWinner} from "./Game.helpers";
 import Board from "../Board/Board";
+import Historic from "./GameHistoric";
+import GameState from "./GameState";
 
-function Game() {
-    const [stepNumber, setStep] = useState(0);
-    const [xIsNext, setNext] = useState(true);
-    const [history, setHistory] = useState([{squares: Array(9).fill(null)}]);
+function Game(props: GameState) {
+    const [stepNumber, setStep] = useState<number>(props.step);
+    const [xIsNext, setNext] = useState<boolean>(props.xIsNext);
+    const [history, setHistory] = useState<Historic[]>(props.gameStateHistory);
 
     function handleClick(i: number): void {
-        const history1 = history.slice(0, stepNumber + 1);
-        const current = history1[history1.length - 1];
+        const historic = history.slice(0, stepNumber + 1);
+        const current = historic[historic.length - 1];
         const sq = current.squares.slice();
 
         if (calculateWinner(sq) || sq[i]) {
             return;
         }
         sq[i] = xIsNext ? 'X' : 'O';
-        setHistory(history1.concat([{squares: sq}]))
-        setStep(history1.length);
+        setHistory(historic.concat([{squares: sq}]))
+        setStep(historic.length);
         setNext(!xIsNext);
     }
 
@@ -28,20 +30,22 @@ function Game() {
 
     const current = history[stepNumber];
     const winner = calculateWinner(current.squares);
-    const moves = history.map((step, move) => {
-        const desc = move ? 'Go to move #' + move : 'Go to game start';
+    const moves = history.map((step: { squares: string[] }, move: number) => {
+        const desc: string = move ? 'Go to move #' + move : 'Go to game start';
         return (
             <li key={move}>
-                <button onClick={() => jumpTo(move)}>{desc}</button>
+                <button id={`btn-move-${move}`} onClick={() => jumpTo(move)}>{desc}</button>
             </li>
         );
     });
-    let status;
-    if (winner) {
-        status = 'Winner: ' + winner;
-    } else {
-        status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+
+    const status = (winner: string): string => {
+        if (winner) {
+            return 'Winner: ' + winner;
+        }
+        return 'Next player: ' + (xIsNext ? 'X' : 'O');
     }
+
     return (
         <div className="game">
             <div className="game-board">
@@ -51,12 +55,11 @@ function Game() {
                 />
             </div>
             <div className="game-info">
-                <div className="status">{status}</div>
+                <div className="status" id="status">{status(winner)}</div>
                 <ol>{moves}</ol>
             </div>
         </div>
     );
 }
-
 
 export default Game;
